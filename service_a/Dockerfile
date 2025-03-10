@@ -8,7 +8,7 @@ RUN if [ ! -f go.mod ]; then go mod init service_a; fi
 
 RUN go mod tidy
 
-RUN go build -o service_a .
+RUN go build -o service_a ./cmd
 
 EXPOSE 8080
 

@@ -1,19 +1,20 @@
 services:
+  service_a:
+    build: ./service_a
+    ports:
+      - "8080:8080"
+    environment:
+      - URL_TEMP=service_b
+      - URL_ZIPKIN=zipkin
+
+  service_b:
+    build: ./service_b
+    ports:
+      - "9090:9090"
+    environment:
+      - URL_ZIPKIN=zipkin
+
   zipkin:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
-
-  service-a:
-    build: ./service_a
-    ports:
-      - "8080:8080"
-    depends_on:
-      - zipkin
-
-  service-b:
-    build: ./service_b
-    ports:
-      - "8081:8081"
-    depends_on:
-      - zipkin
