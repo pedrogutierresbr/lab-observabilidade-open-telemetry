@@ -1,15 +1,15 @@
-FROM golang:1.21
+FROM golang:1.24.1
 
 WORKDIR /app
 
 COPY . .
 
-RUN go mod init service-a
+RUN if [ ! -f go.mod ]; then go mod init service_a; fi
 
 RUN go mod tidy
 
-RUN go build -o service-a .
+RUN go build -o service_a .
 
 EXPOSE 8080
 
-CMD ["./service-a"]
+CMD ["./service_a"]

@@ -25,8 +25,8 @@ func validateZipCode(cep string) bool {
 	return true
 }
 
-func fetchWeatherData(cep string) ([]byte, error) {
-	apiUrl := fmt.Sprintf("http://localhost:8081/weather?cep=%s", cep)
+func fetchCEPWeatherData(cep string) ([]byte, error) {
+	apiUrl := fmt.Sprintf("http://localhost:8081/getCEPWeatherData?cep=%s", cep)
 	resp, err := http.Get(apiUrl)
 	if err != nil {
 		return nil, fmt.Errorf("data could not be fetched")
@@ -44,16 +44,16 @@ func handleZipCodeRequest(w http.ResponseWriter, r *http.Request) {
 	var req ZipCodeRequest
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 	}
 
 	err = json.Unmarshal(body, &req)
 	if err != nil || !validateZipCode(req.CEP) {
-		http.Error(w, "Invalid CEP", http.StatusUnprocessableEntity)
+		http.Error(w, "invalid zipcode", http.StatusUnprocessableEntity)
 		return
 	}
 
-	resp, err := fetchWeatherData(req.CEP)
+	resp, err := fetchCEPWeatherData(req.CEP)
 	if err != nil {
 		http.Error(w, "failure to communicate with service B", http.StatusInternalServerError)
 	}

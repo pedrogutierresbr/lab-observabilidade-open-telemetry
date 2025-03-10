@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   zipkin:
     image: openzipkin/zipkin
@@ -7,14 +5,14 @@ services:
       - "9411:9411"
 
   service-a:
-    build: ./service-a
+    build: ./service_a
     ports:
       - "8080:8080"
     depends_on:
       - zipkin
 
   service-b:
-    build: ./service-b
+    build: ./service_b
     ports:
       - "8081:8081"
     depends_on:
