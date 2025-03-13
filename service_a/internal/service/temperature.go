@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	err := godotenv.Load(filepath.Join("..", "..", "..", ".env"))
+	err := godotenv.Load(filepath.Join("..", "..", ".env"))
 	if err != nil {
 		log.Fatal("warning: could not load .env file", "error:", err)
 	}
