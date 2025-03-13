@@ -15,8 +15,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-const portNum string = ":9090"
-
 var Host string
 var URL_ZIPKIN string
 
@@ -36,13 +34,15 @@ func initTracer() func() {
 	if err != nil {
 		log.Fatalf("failed to create Zipkin exporter: %v", err)
 	}
+
 	tp := trace.NewTracerProvider(
 		trace.WithBatcher(exporter),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("service-B"),
+			semconv.ServiceNameKey.String("service_b"),
 		)),
 	)
+
 	otel.SetTracerProvider(tp)
 	return func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
@@ -54,10 +54,11 @@ func initTracer() func() {
 func main() {
 	log.Println("Starting http server.")
 	initTracer()
+
 	http.HandleFunc("/cep/{zipcode}", handler.HandleTemperature)
-	err := http.ListenAndServe(portNum, otelhttp.NewHandler(http.DefaultServeMux, "http-server"))
+	err := http.ListenAndServe(":8081", otelhttp.NewHandler(http.DefaultServeMux, "http-server"))
 	if err != nil {
 		log.Fatal("error listen and serve", "error:", err)
 	}
-	log.Println("Started on port", portNum)
+	log.Println("Started on port", ":8081")
 }

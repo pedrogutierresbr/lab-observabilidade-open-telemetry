@@ -30,9 +30,11 @@ func initTracer() func() {
 	exporter, err := zipkin.New(
 		URL_ZIPKIN,
 	)
+
 	if err != nil {
 		log.Fatalf("failed to create Zipkin exporter: %v", err)
 	}
+
 	tp := trace.NewTracerProvider(
 		trace.WithBatcher(exporter),
 		trace.WithResource(resource.NewWithAttributes(
@@ -41,6 +43,7 @@ func initTracer() func() {
 		)),
 	)
 	otel.SetTracerProvider(tp)
+
 	return func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
 			log.Fatalf("failed to shutdown TracerProvider: %v", err)
@@ -51,6 +54,7 @@ func initTracer() func() {
 func main() {
 	log.Println("Starting server.")
 	initTracer()
+
 	http.HandleFunc("/cep", handler.HandleZipcode)
 	err := http.ListenAndServe(":8080", otelhttp.NewHandler(http.DefaultServeMux, "http-server"))
 	if err != nil {
