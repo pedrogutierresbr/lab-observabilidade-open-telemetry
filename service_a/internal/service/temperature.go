@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	tracer = otel.Tracer("cep-service")
+	tracer = otel.Tracer("service_a")
 	URL    string
 )
 

@@ -20,14 +20,14 @@ type TemperatureOutputDTO struct {
 }
 
 var (
-	tracer = otel.Tracer("temp-service")
+	tracer = otel.Tracer("service_b")
 )
 
 func HandleTemperature(w http.ResponseWriter, r *http.Request) {
 	var span trace.Span
 	ctx, span := tracer.Start(r.Context(), "HandleTemperature")
 	defer span.End()
-	zipCode := strings.Trim(r.URL.Path, "/cep/")
+	zipCode := strings.TrimPrefix(r.URL.Path, "/cep/")
 	location, err := services.GetLocationByCEP(ctx, zipCode)
 	if err != nil {
 		slog.Error("failed to fetch location by zipCode", "input:", zipCode, "error", err)
@@ -49,7 +49,7 @@ func HandleTemperature(w http.ResponseWriter, r *http.Request) {
 	}
 	byteJson, err := json.Marshal(dto)
 	if err != nil {
-		slog.Error("failed to marshal dto", dto, "error", err)
+		slog.Error("failed to marshal dto", "dto", fmt.Sprintf("%+v", dto), "error", err)
 		http.Error(w, "could not get temperature", http.StatusInternalServerError)
 		return
 	}
