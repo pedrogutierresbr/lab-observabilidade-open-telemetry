@@ -30,7 +30,7 @@ func init() {
 
 	URLServiceB = os.Getenv("URL_SERVICE_B")
 	if URLServiceB == "" {
-		log.Fatal("mandatory variable SERVICE_B_URL not defined in .env")
+		log.Fatal("mandatory variable URL_SERVICE_B not defined in .env")
 	}
 }
 

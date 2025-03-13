@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"service_a/internal/handler"
 
 	"github.com/joho/godotenv"
@@ -22,7 +23,7 @@ var (
 )
 
 func init() {
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load(filepath.Join("..", "..", ".env"))
 	if err != nil {
 		log.Fatal("warning: could not load .env file", "error:", err)
 	}
