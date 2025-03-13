@@ -4,11 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"io"
 	"log/slog"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
@@ -18,11 +22,22 @@ type ViaCEPResponse struct {
 	Localidade string `json:"localidade"`
 }
 
-var viaCepApiURL = "http://viacep.com.br/ws/"
-
 var (
-	tracer = otel.Tracer("service_b")
+	viaCepApiURL string
+	tracer       = otel.Tracer("service_b")
 )
+
+func init() {
+	err := godotenv.Load(filepath.Join("..", "..", ".env"))
+	if err != nil {
+		log.Fatal("warning: could not load .env file", "error:", err)
+	}
+
+	viaCepApiURL = os.Getenv("URL_VIACEP")
+	if viaCepApiURL == "" {
+		log.Fatal("mandatory variable URL_VIACEP not defined in .env")
+	}
+}
 
 func GetLocationByCEP(ctx context.Context, zipCode string) (ViaCEPResponse, error) {
 	var span trace.Span

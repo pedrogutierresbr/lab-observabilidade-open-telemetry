@@ -3,28 +3,35 @@ package service
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 
 	"log/slog"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
 var (
-	tracer = otel.Tracer("service_a")
-	URL    string
+	tracer      = otel.Tracer("service_a")
+	URLServiceB string
 )
 
 func init() {
-	Host := os.Getenv("URL_TEMP")
-	if Host == "" {
-		Host = "localhost"
+	err := godotenv.Load(filepath.Join("..", "..", "..", ".env"))
+	if err != nil {
+		log.Fatal("warning: could not load .env file", "error:", err)
 	}
-	URL = "http://" + Host + ":8081/cep/"
+
+	URLServiceB = os.Getenv("URL_SERVICE_B")
+	if URLServiceB == "" {
+		log.Fatal("mandatory variable SERVICE_B_URL not defined in .env")
+	}
 }
 
 func GetWeatherByZipCode(ctx context.Context, zipCode string) ([]byte, error) {
@@ -32,7 +39,7 @@ func GetWeatherByZipCode(ctx context.Context, zipCode string) ([]byte, error) {
 	ctx, span = tracer.Start(ctx, "GetWeatherByZipCode")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", URL+zipCode, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", URLServiceB+zipCode, nil)
 	if err != nil {
 		slog.Error("unable to make new request with context", "ctx", ctx, "error", err)
 		return nil, err

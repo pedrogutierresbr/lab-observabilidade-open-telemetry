@@ -7,6 +7,7 @@ import (
 	"os"
 	"service_a/internal/handler"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/zipkin"
@@ -15,14 +16,22 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-var Host string
-var URL_ZIPKIN string
+var (
+	Host       string
+	URL_ZIPKIN string
+)
 
 func init() {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("warning: could not load .env file", "error:", err)
+	}
+
 	Host = os.Getenv("URL_ZIPKIN")
 	if Host == "" {
-		Host = "localhost"
+		log.Fatal("mandatory variable URL_ZIPKIN not defined in .env")
 	}
+
 	URL_ZIPKIN = "http://" + Host + ":9411/api/v2/spans"
 }
 
@@ -39,7 +48,7 @@ func initTracer() func() {
 		trace.WithBatcher(exporter),
 		trace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("service-A"),
+			semconv.ServiceNameKey.String("_a"),
 		)),
 	)
 	otel.SetTracerProvider(tp)
@@ -53,7 +62,8 @@ func initTracer() func() {
 
 func main() {
 	log.Println("Starting server.")
-	initTracer()
+	cleanup := initTracer()
+	defer cleanup()
 
 	http.HandleFunc("/cep", handler.HandleZipcode)
 	err := http.ListenAndServe(":8080", otelhttp.NewHandler(http.DefaultServeMux, "http-server"))

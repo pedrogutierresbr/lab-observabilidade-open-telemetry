@@ -1,7 +1,10 @@
 package services
 
 import (
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"context"
 	"encoding/json"
@@ -9,6 +12,7 @@ import (
 	"log/slog"
 	"net/url"
 
+	"github.com/joho/godotenv"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -22,9 +26,27 @@ type Current struct {
 	FarhenheitTemperature float64 `json:"temp_f"`
 }
 
-var weatherApiURL = "http://api.weatherapi.com/v1/current.json"
+var (
+	weatherApiURL string
+	apiKey        string
+)
 
-const apiKey = "9ffa2a727dfc4e9ba7723046251003"
+func init() {
+	err := godotenv.Load(filepath.Join("..", "..", ".env"))
+	if err != nil {
+		log.Fatal("warning: could not load .env file", "error:", err)
+	}
+
+	weatherApiURL = os.Getenv("URL_WEATHERAPI")
+	if weatherApiURL == "" {
+		log.Fatal("mandatory variable URL_WEATHERAPI not defined in .env")
+	}
+
+	apiKey = os.Getenv("WHEATER_API_KEY")
+	if apiKey == "" {
+		log.Fatal("mandatory variable WHEATER_API_KEY not defined in .env")
+	}
+}
 
 func GetWeatherByCity(ctx context.Context, v ViaCEPResponse) (WeatherAPIResponse, error) {
 	var span trace.Span
